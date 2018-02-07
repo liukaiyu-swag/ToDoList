@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title>ToDoList</title>
+		<script src="vue.js" type="text/javascript" charset="utf-8"></script>
+		<style type="text/css">
+			body{
+				background: #999;
+			}
+			*{
+				padding: 0;
+				margin: 0;
+				list-style: none;
+			}
+			.box {
+				width: 600px;
+				margin: 0 auto;
+				margin-top: 20px;
+			}
+			
+			.head {
+				font-size: 30px;
+				color: #000;
+				color: #FFFFFF;
+				font-weight: bold;
+				margin-bottom: 20px;
+			}
+			
+			#text {
+				width: 100%;
+				padding: 10px 10px;
+				box-sizing: border-box;
+				
+			}
+			.btns{
+				width: 100%;
+				display: flex;
+				margin: 10px 0;
+				padding-right: 20px;
+				align-items: center;
+				justify-content: flex-end;
+			}
+			#btn{
+				cursor: pointer;
+				margin-left: 10px;
+				padding: 5px;
+				font-weight: bold;
+			}
+			.listbox{
+				width: 100%;
+				margin-top: 20px;
+			}
+			.list{
+				width: 100%;
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				padding:5px 10px;
+				box-sizing: border-box;
+			}
+			.lists{
+				width: 100%;
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				border-bottom: 2px solid skyblue;
+				padding:5px 10px;
+
+			}
+			.done{
+				width: 20px;
+				height: 20px;
+				border-radius: 50%;
+				border: 2px solid black;
+				cursor: pointer;
+			}
+			.con{
+				width: 80%;
+				height: 100%;
+				font-size: 30px;
+				
+			}
+			.del{
+				width: 40px;
+				height: 20px;
+				text-align: center;
+				line-height: 20px;
+				border-radius: 10px;
+				border: 2px solid black;
+				cursor: pointer;
+				padding: 5px;
+			}
+			.del:hover{
+				background: rgba(255,255,255,0.6);
+			}
+			.state{
+				background: red;
+				border: 2px solid white;
+			}
+			.status{
+				color: skyblue;
+			}
+		</style>
+	</head>
+
+	<body>
+		<div class="box">
+			<div class="head">ToDoList.</div>
+			<input type="text" id="text" placeholder="添加ToDo，点击回车提交" v-model="con" @keydown.13="save()"/>
+			<span>{{message}}</span>
+			<span class="btns">
+				<input type="button" name="" id="btn" value="全部" @click="changeStatus('all')" :class="{status:status=='all'}"/>
+				<input type="button" name="" id="btn" value="未完成" @click="changeStatus(0)" :class="{status:status==0}"/>
+				<input type="button" name="" id="btn" value="已完成" @click="changeStatus(1)" :class="{status:status==1}"/>
+			</span>
+			<ul class="listbox" v-show="datas.length>0">
+				<li class="list" v-for="item in datas">
+					<div class="lists" v-show="item.save">
+					<span class="done" @click="changeState(item)" :class="{state:item.state==1}"></span>
+					<span class="con" @dblclick="edit(item)">{{item.title}}</span>
+					<span class="del" @click="del(item.id)">删除</span>
+					</div>
+					<div v-show="!item.save">
+						<input type="text" v-model="item.title" @keydown.13="edit(item)"/>
+					</div>
+				</li>
+			</ul>
+			<ul v-show="datas.length==0">
+				没有数据
+			</ul>
+		</div>
+
+	</body>
+	<script type="text/javascript">
+		var app = new Vue({
+			el: ".box",
+			data: {
+				all:localStorage.todo?JSON.parse(localStorage.todo):[],
+				con:"",
+				message:"",
+				status:"all"
+			},
+			methods:{
+				save(){
+					if(this.con==""){
+						this.message="请先输入内容"
+						return
+					}
+					this.message="";
+					var obj={};
+					obj.title=this.con;
+					obj.id=new Date().getTime();
+					obj.state=0;
+					obj.save=true;
+					this.all.push(obj);
+					localStorage.todo=JSON.stringify(this.all);
+					this.con="";
+				},
+				del(id){
+					this.all=this.all.filter(function(item){
+						if(item.id!=id){
+							return item
+						}
+					})
+					localStorage.todo=JSON.stringify(this.all);
+				},
+				changeState(item){
+					if(item.state==0){
+						item.state=1	
+					}else{
+						item.state=0
+					}
+				},
+				changeStatus(num){
+					this.status=num
+					console.log(this.status)
+				},
+				edit(item){
+					item.save=!item.save
+					localStorage.todo=JSON.stringify(this.all);
+				}
+			},
+			computed:{
+				datas(){
+					return this.all.filter((item)=>{
+						if(this.status=='all'){
+							return item
+						}else{
+							if(item.state==this.status){
+								return item
+							}
+						}
+					})
+				}
+			}
+		})
+		console.log(app.all)
+	</script>
+
+</html>
